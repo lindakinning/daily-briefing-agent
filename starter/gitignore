@@ -1,0 +1,19 @@
+# Environments
+.venv/
+venv/
+.env
+
+# Python build artifacts
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+
+# Secrets and generated output — never commit these
+credentials/
+output/
+
+# OS cruft
+.DS_Store
+Thumbs.db
