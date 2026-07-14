@@ -5,7 +5,7 @@ Build your own **Executive Assistant morning agent** in 75 minutes — or finish
 ## Workshop quick start (5 min, no Google)
 
 ```bash
-cd workshop/starter
+cd starter
 python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -e .
@@ -62,9 +62,9 @@ starter/
 └── scripts/setup_google_auth.py
 ```
 
-## Full reference build
+## Where this can go next
 
-The parent repo (`daily-brief-agent`) adds:
+`FINISH-ON-YOUR-OWN.md` walks through building each of these yourself:
 
 - Apple Notes with collapsible sections + checkboxes
 - Apple Reminders with dedupe + urgency tiers
@@ -72,6 +72,8 @@ The parent repo (`daily-brief-agent`) adds:
 - Weekend personal mode
 - 7 AM scheduling with catch-up on wake
 
+There isn't a separate "full" repo to clone for these — the starter here is the whole thing. Each upgrade is a small, self-contained addition described step-by-step in the finish guide.
+
 ## Need help?
 
-Read `FINISH-ON-YOUR-OWN.md` and `../participant-handout.md`.
+Read `FINISH-ON-YOUR-OWN.md`.
