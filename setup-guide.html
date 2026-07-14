@@ -850,48 +850,72 @@ python scripts/setup_google_auth.py</pre>
           <label class="step-check"><input type="checkbox" data-step-check="8"><span>Done</span></label>
         </div>
         <div class="step-body">
-          <p>Writers are plug-ins — one working writer is a successful workshop. Swap this choice above any time without touching the rest of your build.</p>
+          <p>The starter ships one working writer: markdown. It's a genuinely complete, successful workshop outcome on its own. Todoist, Google Tasks, and Apple Reminders are real stretch goals — each is a small file you write, following the pattern already in the codebase, not a setting you flip.</p>
 
           <div class="branch" data-req-writer="markdown">
-            <div class="recap">You chose: <b>Markdown checklist</b> — already done.</div>
-            <p>This is the starter's default writer. Tasks land in the same Daily Brief markdown file as a checklist — nothing to install, nothing to configure.</p>
+            <div class="recap">You chose: <b>Markdown checklist</b> — already done. <span class="badge" style="margin-left:4px;">Ready now</span></div>
+            <p>This is the starter's default writer, already wired up in <code>run.py</code>. Tasks land in the same Daily Brief markdown file as a checklist — nothing to install, nothing to write.</p>
           </div>
 
           <div class="branch" data-req-writer="todoist">
-            <div class="recap">You chose: <b>Todoist</b></div>
+            <div class="recap">You chose: <b>Todoist</b> <span class="badge" style="margin-left:4px;">You'll write this</span></div>
+            <p class="muted">Honest status: the starter only ships the markdown writer. Todoist isn't a config toggle — it's a short stretch-goal file you add yourself. Here's the whole thing:</p>
             <div class="code">
-              <div class="code-head"><span class="code-lang">terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-              <pre>pip install todoist-api-python
-<span class="c"># add to .env:</span>
-TODOIST_API_TOKEN=your-token-here
-<span class="c"># in config.yaml:</span>
-task_writer: todoist</pre>
+              <div class="code-head"><span class="code-lang">src/ea_workshop/writers/todoist.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre>pip install requests   <span class="c"># add to pyproject.toml dependencies too</span>
+
+<span class="c"># add TODOIST_API_TOKEN to .env, then:</span>
+import os
+import requests
+
+def create_tasks(tasks: list) -> list[str]:
+    token = os.environ["TODOIST_API_TOKEN"]
+    created = []
+    for task in tasks:
+        resp = requests.post(
+            "https://api.todoist.com/rest/v2/tasks",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"content": task.title, "description": task.notes},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        created.append(task.title)
+    return created</pre>
             </div>
-            <div class="branch-note">Dedupe matters more here than markdown — LLMs rephrase task titles daily, so step 10's dedupe layer is worth adding early.</div>
+            <div class="branch-note">Call <code>create_tasks(result.tasks)</code> from <code>run.py</code> right after <code>synthesize()</code>. Dedupe matters more here than markdown — LLMs rephrase task titles daily, so step 10's dedupe layer is worth adding at the same time, not later.</div>
           </div>
 
           <div class="branch" data-req-writer="google_tasks">
-            <div class="recap">You chose: <b>Google Tasks</b></div>
+            <div class="recap">You chose: <b>Google Tasks</b> <span class="badge" style="margin-left:4px;">You'll write this</span></div>
+            <p class="muted">Same honest status as Todoist — this is a stretch goal, not a flip-a-switch option. It reuses the OAuth credentials from step 7.</p>
             <div class="code">
-              <div class="code-head"><span class="code-lang">terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-              <pre>pip install google-api-python-client
-<span class="c"># reuses the OAuth credentials from step 7 —
-# add the Tasks scope and re-run setup_google_auth.py
-# in config.yaml:</span>
-task_writer: google_tasks</pre>
+              <div class="code-head"><span class="code-lang">setup</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><span class="c"># 1. Add the Tasks scope in collectors/google_live.py:</span>
+SCOPES = [
+    ...,
+    "https://www.googleapis.com/auth/tasks",
+]
+<span class="c"># 2. Delete credentials/google_token.json and re-run:</span>
+python scripts/setup_google_auth.py
+<span class="c"># 3. Write writers/google_tasks.py using the same
+#    `build("tasks", "v1", credentials=creds)` pattern
+#    google_live.py already uses for Gmail/Calendar</span></pre>
             </div>
-            <div class="branch-note" data-req-data="sample">Google Tasks needs the OAuth credentials from step 7. Switch "Data source" to <em>Live Gmail + Calendar</em> first.</div>
+            <div class="branch-note" data-req-data="sample">Needs the OAuth credentials from step 7. Switch "Data source" to <em>Live Gmail + Calendar</em> first.</div>
           </div>
 
           <div class="branch" data-req-writer="apple_reminders">
-            <div class="recap">You chose: <b>Apple Reminders</b></div>
+            <div class="recap">You chose: <b>Apple Reminders</b> <span class="badge" style="margin-left:4px;">You'll write this</span></div>
             <div class="branch" data-req-os="mac">
+              <p class="muted">Stretch goal, macOS only. Install the extra, then write the writer using EventKit.</p>
               <div class="code">
                 <div class="code-head"><span class="code-lang">terminal · macOS</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-                <pre><span class="c"># in config.yaml:</span>
-task_writer: apple_reminders
-<span class="c"># first run will prompt for Reminders access —
-# approve it in System Settings → Privacy & Security</span></pre>
+                <pre>pip install -e ".[apple]"
+<span class="c"># then write src/ea_workshop/writers/reminders.py using
+# EventKit.EKEventStore — create one EKReminder per task,
+# set its list/title/notes, and save via the store.
+# First run prompts for access —</span>
+<span class="c"># approve in System Settings → Privacy &amp; Security → Reminders</span></pre>
               </div>
             </div>
             <div class="branch-note" data-req-os="windows">Apple Reminders needs macOS. Switch the OS toggle above to <em>macOS / Linux</em>, or pick Todoist / Google Tasks instead — both work everywhere.</div>
@@ -924,7 +948,7 @@ task_writer: apple_reminders
               <div class="code-head"><span class="code-lang">crontab -e</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
               <pre>0 7 * * * cd ~/starter && .venv/bin/ea-workshop >> ~/ea-brief.log 2>&1</pre>
             </div>
-            <div class="branch-note">Full build with launchd instead: <code>./scripts/install_launchd.sh install</code></div>
+            <div class="branch-note">Prefer launchd? It catches up on wake if your laptop was asleep at 7am — cron just skips the run. Full plist template in <code>FINISH-ON-YOUR-OWN.md</code>, Step 5.</div>
           </div>
 
           <div class="branch" data-req-os="windows">
@@ -1053,10 +1077,10 @@ python -m ea_workshop.run</pre>
     <div>
       <h2 style="font-size:16px;text-transform:uppercase;letter-spacing:.06em;">Resources</h2>
       <ul class="footer-links">
-        <li><span class="k">Finish guide</span><code>starter/FINISH-ON-YOUR-OWN.md</code></li>
+        <li><span class="k">Workshop repo</span><a href="https://github.com/lindakinning/daily-briefing-agent" target="_blank" rel="noopener">github.com/lindakinning/daily-briefing-agent</a></li>
+        <li><span class="k">Finish guide</span><a href="https://github.com/lindakinning/daily-briefing-agent/blob/main/starter/FINISH-ON-YOUR-OWN.md" target="_blank" rel="noopener">starter/FINISH-ON-YOUR-OWN.md</a></li>
         <li><span class="k">Anthropic API</span><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a></li>
         <li><span class="k">Google Cloud OAuth</span><a href="https://console.cloud.google.com" target="_blank" rel="noopener">console.cloud.google.com</a></li>
-        <li><span class="k">Full reference build</span><a href="https://github.com/your-org/daily-brief-agent" target="_blank" rel="noopener">daily-brief-agent</a></li>
       </ul>
     </div>
     <div class="foot-tiny">Build Your Executive Assistant Agent — Participant self-service guide</div>
