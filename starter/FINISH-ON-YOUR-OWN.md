@@ -9,7 +9,7 @@ Work through the steps in order. Each step is independently useful.
 ## Step 0: Confirm the starter works
 
 ```bash
-cd workshop/starter
+cd starter
 source .venv/bin/activate
 ea-workshop --sample --dry-run
 ```
@@ -78,7 +78,7 @@ ea-workshop              # writes output/Daily Brief — DATE.md
 
 ### Multi-account (advanced)
 
-Copy the pattern from the full `daily-brief-agent` repo — one token file per Gmail account, loop collectors, tag each item with `account` label.
+There's no bundled code for this — here's the shape of it: store one OAuth token file per Gmail account (e.g. `credentials/token_work.json`, `credentials/token_personal.json`), loop `collect_google_data()` once per token, and set the `account` field on each `EmailSummary`/`CalendarEvent` as you go so the prompt can tell them apart.
 
 ---
 
@@ -130,7 +130,7 @@ Use Google Tasks API with the same OAuth credentials. Add scope:
 pip install -e ".[apple]"
 ```
 
-Copy `writers/reminders.py` and `reminder_dedupe.py` from the full `daily-brief-agent` repo. Grant Reminders permission to your Python binary in System Settings.
+There's no bundled writer for this yet — you'll write `src/ea_workshop/writers/reminders.py` using the `pyobjc-framework-EventKit` package (already installed above). At a high level: request calendar/reminders access via `EventKit.EKEventStore`, create an `EKReminder` per task, and set its list, title, and notes. The first run will prompt for permission — approve it in **System Settings → Privacy & Security → Reminders**.
 
 ---
 
@@ -147,10 +147,8 @@ Pass your open tasks into the prompt — the starter already includes `existing_
 Before creating any task:
 
 1. Load ALL open tasks from your todo app
-2. Skip if normalized title matches
-3. Skip if fuzzy match (shared keywords)
-
-See `daily-brief-agent/src/daily_brief/reminder_dedupe.py` for a full implementation.
+2. Skip if normalized title matches (lowercase, strip punctuation, compare)
+3. Skip if fuzzy match — Python's built-in `difflib.SequenceMatcher(None, a, b).ratio()` above ~0.75 is a reasonable starting threshold for "probably the same task"
 
 ---
 
@@ -163,12 +161,35 @@ crontab -e
 ```
 
 ```
-0 7 * * * cd /full/path/to/workshop/starter && .venv/bin/ea-workshop >> ~/ea-brief.log 2>&1
+0 7 * * * cd /full/path/to/starter && .venv/bin/ea-workshop >> ~/ea-brief.log 2>&1
 ```
 
-### Mac (launchd — full build)
+### Mac (launchd — runs even if you missed 7 AM)
 
-Copy `launchd/` and `scripts/install_launchd.sh` from `daily-brief-agent`.
+launchd catches up on wake, where cron just skips the missed run. Save this as `~/Library/LaunchAgents/com.eaworkshop.daily.plist` (swap in your real paths):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.eaworkshop.daily</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/full/path/to/starter/.venv/bin/ea-workshop</string>
+  </array>
+  <key>WorkingDirectory</key><string>/full/path/to/starter</string>
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>0</integer></dict>
+  <key>RunAtLoad</key><false/>
+  <key>StandardOutPath</key><string>/tmp/ea-brief.log</string>
+  <key>StandardErrorPath</key><string>/tmp/ea-brief-error.log</string>
+</dict>
+</plist>
+```
+
+Then load it: `launchctl load ~/Library/LaunchAgents/com.eaworkshop.daily.plist`
 
 ### Windows (Task Scheduler)
 
@@ -195,26 +216,28 @@ from datetime import datetime
 if datetime.now().weekday() >= 5:  # Sat/Sun
     data.emails = [e for e in data.emails if e.account == "Personal"]
     data.calendar_events = [e for e in data.calendar_events if e.account == "Personal"]
-    # use a different SYSTEM_PROMPT — see daily-brief-agent/src/daily_brief/weekend.py
+    # swap in a second system prompt for weekends — copy SYSTEM_PROMPT in
+    # synthesizer.py, rename it WEEKEND_PROMPT, and pass it to synthesize()
+    # based on the day of week
 ```
 
 Weekend prompt should say: personal life coach voice, no work tasks, life goals + wellness.
 
 ---
 
-## Step 7: Upgrade to the full build
+## Step 7: Where to take it from here
 
-When you're ready for the complete experience:
+Everything above is the complete build — there's no separate "full" repo waiting behind it. Once you've worked through Steps 1–6 you have all the pieces; from here it's a matter of which of these you want to add next:
 
-| Feature | Full repo |
-|---------|-----------|
-| Apple Notes (collapsible sections) | `writers/notes.py` |
-| Apple Reminders + dedupe | `writers/reminders.py` |
-| 3 Gmail accounts | `collectors/google_mail.py` |
-| Granola meeting notes | `collectors/granola.py` |
-| Catch-up on wake | `launchd/` + `scheduler.py` |
+| Feature | Where it lives | Covered above |
+|---------|-----------------|-----------------|
+| A second task writer (Todoist / Google Tasks / Apple Reminders) | new file under `writers/` | Step 3 |
+| Dedupe so tasks don't repeat daily | inside your chosen writer, before creating | Step 4 |
+| Scheduled daily runs | cron, launchd, or Task Scheduler | Step 5 |
+| Weekend mode | a few lines in `run.py` + a second prompt | Step 6 |
+| Multiple Gmail accounts | loop the collector, tag by account | Step 2 |
 
-Clone or copy patterns from `/Users/lindakinning/Projects/daily-brief-agent`.
+If you build something worth reusing across cohorts, that's the point where a second, shared repo starts to make sense — but you don't need one to have a complete, working agent.
 
 ---
 
