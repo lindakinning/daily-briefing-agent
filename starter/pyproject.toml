@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ea-workshop"
+version = "0.1.0"
+description = "Workshop starter: build your executive assistant morning agent"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "anthropic>=0.40.0",
+  "google-api-python-client>=2.150.0",
+  "google-auth-oauthlib>=1.2.0",
+  "google-auth-httplib2>=0.2.0",
+  "python-dotenv>=1.0.0",
+  "pyyaml>=6.0.0",
+]
+
+[project.scripts]
+ea-workshop = "ea_workshop.run:main"
+
+[project.optional-dependencies]
+apple = [
+  "pyobjc-framework-EventKit>=10.0",
+  "pyobjc-framework-Cocoa>=10.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

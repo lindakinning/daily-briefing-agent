@@ -1,0 +1,74 @@
+{
+  "emails": [
+    {
+      "id": "1",
+      "subject": "Re: Q3 board deck — need your input by EOD",
+      "sender": "sarah.chen@company.com",
+      "snippet": "Can you review slides 8-12 on the market sizing section? Board meeting is Thursday.",
+      "date": "2026-07-13T08:15:00",
+      "is_unread": true,
+      "is_starred": true,
+      "account": "Work"
+    },
+    {
+      "id": "2",
+      "subject": "Follow up: partnership call with Meridian",
+      "sender": "james@meridian.io",
+      "snippet": "Great chatting yesterday. Sending over the term sheet for your review.",
+      "date": "2026-07-13T07:42:00",
+      "is_unread": true,
+      "is_starred": false,
+      "account": "Work"
+    },
+    {
+      "id": "3",
+      "subject": "Soccer practice moved to 4:30pm",
+      "sender": "coach@youthsoccer.org",
+      "snippet": "Field change: Columbus Park today instead of the usual field.",
+      "date": "2026-07-12T18:30:00",
+      "is_unread": true,
+      "is_starred": false,
+      "account": "Personal"
+    }
+  ],
+  "calendar_events": [
+    {
+      "id": "cal-1",
+      "title": "Team standup",
+      "start": "2026-07-13T09:00:00",
+      "end": "2026-07-13T09:30:00",
+      "location": "Zoom",
+      "account": "Work"
+    },
+    {
+      "id": "cal-2",
+      "title": "1:1 with Sarah",
+      "start": "2026-07-13T11:00:00",
+      "end": "2026-07-13T11:30:00",
+      "location": "Google Meet",
+      "account": "Work"
+    },
+    {
+      "id": "cal-3",
+      "title": "Soccer practice",
+      "start": "2026-07-13T16:30:00",
+      "end": "2026-07-13T17:30:00",
+      "location": "Columbus Park",
+      "account": "Personal"
+    }
+  ],
+  "meeting_notes": [
+    {
+      "id": "mtg-1",
+      "title": "Meridian partnership call",
+      "date": "2026-07-12",
+      "summary": "Discussed co-marketing pilot. They want a decision on term sheet by Friday. You agreed to review with legal.",
+      "attendees": ["James Marsden", "You"]
+    }
+  ],
+  "existing_reminders": [
+    {"title": "Review Meridian term sheet", "role": "Work", "list": "Work"},
+    {"title": "Buy birthday gift for Mom", "role": "Personal", "list": "Personal"}
+  ],
+  "collection_errors": []
+}
