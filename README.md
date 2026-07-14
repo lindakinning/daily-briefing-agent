@@ -1,4 +1,4 @@
-# EA Workshop Starter
+# Build Your Own EA Workshop Starter
 
 Build your own **Executive Assistant morning agent** in 75 minutes — or finish at your own pace.
 
