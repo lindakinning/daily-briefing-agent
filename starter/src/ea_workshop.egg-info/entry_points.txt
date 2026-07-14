@@ -1,2 +1,0 @@
-[console_scripts]
-ea-workshop = ea_workshop.run:main
